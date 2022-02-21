@@ -40,7 +40,7 @@ const authorMostLikes = (blogs) => {
 
   for (let i = 0; i < authors.length; i++) {
     let list = blogs.filter(blog => blog.author === authors[i]);
-      arrr.push({author: authors[i], likes:list.map(n => n.likes).reduce((a, b)=> a + b) })
+    arrr.push({author: authors[i], likes:list.map(n => n.likes).reduce((a, b)=> a + b) });
   }
   let numOfLikes = arrr.map(arr => arr.likes);
   let maxLikes = Math.max(...numOfLikes);

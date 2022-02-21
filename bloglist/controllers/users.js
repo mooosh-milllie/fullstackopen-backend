@@ -7,6 +7,22 @@ userRouter.get('/', async (request, response) => {
   response.status(200).json(users);
 })
 
+userRouter.get('/:id', async (request, response) => {
+  const userID = request.user;
+  if (!userID) {
+    return response.status(401).json({
+      error: 'Unauthorized request'
+    });
+  }
+  if (userID === request.params.id) {
+   const user = await User.findById(request.params.id).populate('blog', {author: 1, title:1, url: 1, likes: 1});
+   return response.json(user);
+  }
+  return response.status(401).json({
+    error: 'Unathorized request'
+  })
+})
+
 userRouter.post('/', async (request, response) => {
   const body = request.body;
   const saltRound = 10;

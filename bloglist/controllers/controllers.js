@@ -5,7 +5,6 @@ const User = require('../models/users');
 blogRouter.get('/', async (request, response) => {  
   const blog = await Blog.find({}).populate('user', {name: 1, username: 1});
   response.json(blog);
-
 })
 
 blogRouter.post('/',async (request, response) => {
@@ -16,13 +15,26 @@ blogRouter.post('/',async (request, response) => {
     return response.status(401).json({ error: 'Unauthorized Request' });
   }
   const user = await User.findById(userId);
-  const newBlog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes || 0,
-    user: body.userId
-  })
+
+  let newBlog;
+
+  if (process.env.NODE_ENV === 'test') {
+    newBlog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes || 0,
+      user: userId
+    })
+  } else {
+    newBlog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: 0,
+      user: userId
+    })
+  }
 
   const savedBlog = await newBlog.save();
   
@@ -49,15 +61,19 @@ blogRouter.delete('/:id', async (request, response) => {
   const id = request.params.id;
   const user = request.user;
   if (!user) {
-    return response.status(401).json({ error: 'token missing or invalid' });
+    return response.status(500).json({ error: 'token missing or invalid' });
   }
   const userId = await User.findById(request.user);
   const getBlog = await Blog.findById(id);
-  if (!userId || !getBlog) {
-    return response.status(401).json({ error: 'Request not authorised' });
-  } else if(userId.id.toString() === getBlog.user.toString()) {
-    await Blog.findByIdAndDelete(id);
-    response.status(204).end();
-  }
+    if (!userId || !getBlog) {
+      return response.status(401).json({ error: 'Request not authorised' });
+    } else if(userId.id.toString() !== getBlog.user.toString()) {
+      return response.status(401).json({
+      error: 'only blog creator can delete blog information'
+      })
+    } else if(userId.id.toString() === getBlog.user.toString()) {
+      await Blog.findByIdAndDelete(id);
+      response.status(204).end();
+    }
 })
 module.exports = blogRouter;

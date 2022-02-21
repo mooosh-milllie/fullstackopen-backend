@@ -145,14 +145,11 @@ describe('Highest likes', () => {
 
   test('Author with most cumulative likes', () => {
     const result = listHelper.authorMostLikes(listWithMoreThanOneBlog);
-
     expect(result).toEqual({author: 'Edsger Dijkstra', likes: 1990})
-
   })
 
   test('Author with most blogs', () => {
     const result = listHelper.authorMostBlogs(listWithMoreThanOneBlog);
-
     expect(result).toEqual({author: 'Edsger W. Dijkstra', blogs: 5})
   })
 })
